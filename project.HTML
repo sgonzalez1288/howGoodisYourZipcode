@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+</head>
+<style>
+    body{
+        background-color: gray;
+    }
+    .card{
+        width:300px;
+        padding:10px;
+        margin:10px;
+        display:inline-block;
+        border-radius:10px;
+        box-shadow:black 5px 5px 5px;
+    }
+    h1{
+        font-family: "Times New Roman", Times, serif;
+        text-shadow:gray 2px 2px 2px;
+        font-size: 30px;
+        display:inline-block;
+    }
+    h2{
+        font-family:"Arial";
+        font-size: 16px;
+        
+        
+    }
+    h3{
+        color: blue;
+        font-family:"Arial";
+        text-shadow:black 3px 3px 3px;
+        font-size: 70px;
+        text-align: center;
+        text-decoration: underline;
+        
+    }
+    h4{
+        font-family:"Arial";
+        font-size: 16px;
+        font-style: italic;
+        
+        
+    }
+    p{
+        color: black;
+        font-size:15pt;
+        font-family:"Arial";
+        font-style: italic;
+        font-weight: bold;
+        text-align: center;
+    }
+ 
+    .img__wrap {
+                position: relative;
+                height: 470px;
+                width: 420px;
+                margin-left: auto;
+                margin-right: auto;
+                display: table-cell;
+                vertical-align: middle;
+                justify-content: center;
+            }
+    .img__description1 {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: lightblue;
+                color: black;
+                visibility: hidden;
+                opacity: 0;
+                transition: opacity .2s, visibility .2s;
+            
+            }
+    .img__description2 {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: lightcoral;
+                color: black;
+                visibility: hidden;
+                opacity: 0;
+                transition: opacity .2s, visibility .2s;
+                
+            }
+    .img__description3 {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: lightblue;
+                color: black;
+                visibility: hidden;
+                opacity: 0;
+                transition: opacity .2s, visibility .2s;
+                
+            }
+    .img__wrap:hover .img__description1{
+                visibility: visible;
+                opacity: 1;
+            }
+    .img__wrap:hover .img__description2{
+                visibility: visible;
+                opacity: 1;
+            }
+    .img__wrap:hover .img__description3{
+                visibility: visible;
+                opacity: 1;
+            }
+    #output1{
+
+  justify-content: center;
+  text-align: center;
+   background-color: lightblue ;
+    width: 100%;
+    height: 750px;
+    border: 1px dotted black;
+    overflow: scroll;
+
+    }
+    
+        #output2{
+    
+  justify-content: center;
+  width: 500px;
+    height: 710px;
+ 
+    }
+        #output3{
+    
+  justify-content: center;
+  text-align: center;
+   background-color:lightcoral;
+    width: 100%;
+    height: 750px;
+    border: 1px dotted black;
+    overflow: scroll;
+
+   
+    }
+    .flexContainer{
+        display: none;
+        font-size:14pt;
+        font-family:"Arial";
+        text-align: center;
+    }
+    .flexItem1{
+        flex: 1;
+        font-size:14pt;
+        font-family:"Arial";
+        text-align: center;
+    }
+    .flexItem2{
+        flex: 2;
+        font-size:14pt;
+        font-family:"Arial";
+        text-align: center;
+    }
+
+  
+
+</style>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.min.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBcg9IH8WnaswCxiWhjNeM3PvsrUIlYJfw"></script>
+<script type="text/template" id="cardTemplate311">
+
+    <div class="card">
+        
+        <h1> {{agency_name}} </h1>
+        <h2> {{complaint_type}} </h2>
+        <h4> {{incident_zip}} </h4>
+
+
+
+    </div>
+</script>
+<script type="text/template" id="cardTemplateAccidents">
+
+    <div class="card">
+
+        <h1> {{contributing_factor_vehicle_1}} </h1>
+        <h2> {{date}} </h2>
+        <h2> {{number_of_persons_killed}} </h2>
+        <h4> {{zip_code}} </h4>
+
+
+    </div>
+</script>
+<script>
+    var data1,data2;
+    $.ajaxSetup({
+        async:false
+    }) ;
+
+    function loadJSON(){                
+    
+            data1=  $.getJSON("https://data.cityofnewyork.us/resource/fhrw-4uyv.json").responseJSON; //311 calls
+            data2= $.getJSON("https://data.cityofnewyork.us/resource/qiz3-axqb.json").responseJSON; //accidents 
+    }
+    function myMap() {
+        
+        var mapCanvas = document.getElementById("map");
+        var mapOptions = {
+            center: new google.maps.LatLng(markerlocations[0].lat,markerlocations[0].lng), 
+            zoom: 18
+        };
+        var map = new google.maps.Map(mapCanvas, mapOptions);
+        for(var index = 0; index < markerlocations.length; index++){
+            var myCenter = new google.maps.LatLng(markerlocations[index].lat,markerlocations[index].lng);
+            var marker = new google.maps.Marker({position:myCenter});
+            marker.setMap(map);
+        }
+        
+    }
+    var data = [];
+    function displayInfo(){
+        var build= "";
+        var output1 = document.getElementById("output1")
+        var output = document.getElementById("output")
+        var output3 = document.getElementById("output3")
+        var zipcode = document.getElementById("zip")
+        var cardTemplate311 = document.getElementById("cardTemplate311").innerHTML;
+        var cardTemplateAccidents = document.getElementById("cardTemplateAccidents").innerHTML;
+        markerlocations = [];
+        for(var index = 0; index < data1.length; index++){
+
+            try{
+                if(data1[index].incident_zip.toLowerCase().indexOf(zipcode.value.toLowerCase()) !=  -1){
+
+                 build+= Mustache.render(cardTemplate311, data1[index]);
+                 markerlocations.push({lat:data1[index].latitude, lng:data1[index].longitude} )
+                 }
+            }catch(e){}
+            
+        }
+        output1.innerHTML= build 
+        
+        build= "";
+        for(var index = 0; index < data2.length; index++){
+            try{
+                if(data2[index].zip_code.toUpperCase().indexOf(zipcode.value.toUpperCase()) !=  -1){
+                    
+                build+= Mustache.render(cardTemplateAccidents, data2[index]);
+                markerlocations.push({lat:data1[index].latitude, lng:data1[index].longitude} )
+
+                }
+            }catch(e){}
+        }   
+        output3.innerHTML= build
+        output.style.display = "flex";
+        myMap();
+
+
+    }
+
+</script>
+
+<body onload="loadJSON()">
+        
+    <h3>How Good is Your Zipcode?!</h3>
+    <p> 
+        In these data sets you can search for accidents and 311 calls in a specific zipcode. 
+        This is useful because it's simply using information from New York data sets, and giving the user access to view their neighborhood.
+        If they are looking to buy a house in a certain area they can see how safe the area is. 
+        The website is user friendly and allows the user to search a zip code, as well as view a google map of the specific search.
+        On the right side of the website you can view the 311 calls aimed towards that search, and on the left side you can see the accidents in the area you searched.
+        On the map it shows markers as to where each accident or call specifically occured.
+    </p>
+    
+    <div class="img__wrap">
+            <img height="505" width="505" class="img__img" src="311 calls 1.png" />
+            <h4 class="img__description1">
+               This is the 1st screenshot of the JSON for the 311 calls, where you will find the array and all the variables!
+            </h4>
+        </div>
+        <div class="img__wrap">
+                <img height="505" width="505" class="img__img" src="311 calls 2.png" />
+                <h4 class="img__description2">
+                   This is the 2nd screenshot of the JSON for the 311 calls, where you will find the array and all the variables!
+                </h4>
+            </div>
+            <div class="img__wrap">
+                    <img height="505" width="555" class="img__img" src="311 calls 2.png" />
+                    <h4 class="img__description3">
+                       This is the 1st screenshot of the JSON for the Accidents, where you will find the array and all the variables!
+                    </h4>
+                </div>
+
+    <input type="text" id="zip" placeholder="Enter Zipcode">
+    <button onclick="displayInfo()"> Display</button>
+
+<div class="flexContainer" id="output">
+        <div class="flexItem1">
+                <p>Calls</p>
+                <div id="output1">
+                </div>
+        </div>
+        <div class="flexItem2">
+                    <p> Map</p>
+                <div id="map" style="width:100%;height:735px"></div>
+
+        </div>
+        <div class="flexItem1">
+                <p> Accidents</p>
+            <div id="output3">
+            </div>
+        </div>
+</div>
+</body>
+
+</html>
